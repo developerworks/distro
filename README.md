@@ -117,6 +117,12 @@ iex --name def@192.168.8.104 -pa _build/dev/lib/distro/ebin/ --app distro --erl 
 ```
 
 
+## 验证步骤
+
+1. 终止(Ctrl+C两次)节点`abc@192.168.8.104`后,5秒内会在节点`bcd@192.168.8.104`上重启应用
+2. 再次启动节点`abc@192.168.8.104`后,应用在`bcd@192.168.8.104`上停止, 应用被恢复后的`abc@192.168.8.104`节点接管(Takeover)
+
+
 ## 参考资料
 
 1. Elixir Application Failover/Takeover
