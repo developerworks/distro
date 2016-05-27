@@ -22,5 +22,25 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+# Kernel
+config :kernel, :distributed,
+  [{:distro, 5000,[:"a@localhost", {:"b@localhost", :"c@localhost"}]}]
+config :kernel,
+  sync_nodes_mandatory: []
+config :kernel,
+  sync_nodes_optional: []
+config :kernel,
+  sync_nodes_timeout: 30000
+
+config :distro, :allowed_boot, (for x <- 2..254, do: "192.168.8.#{x}" |> String.to_atom)
+
+# A logger with default level
+config :logger,
+  level: :info
+
+# Overwrite the logger level and format in console
 config :logger, :console,
+  level: :info,
   format: "$date $time $metadata[$level] $message\n"
+
