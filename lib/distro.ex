@@ -4,7 +4,7 @@ defmodule Distro do
 
   def start(type, _args) do
     import Supervisor.Spec, warn: false
-    Logger.info("Distro application in #{inspect type} mode")
+    Logger.info("Distro application started in #{inspect type} mode")
 
     children = [
       worker(Distro.Worker, [])
