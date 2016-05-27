@@ -68,7 +68,11 @@ touch config/bcd.config
 touch config/def.config
 ```
 
-配置文件中有3个重要的键值对.
+配置文件中有3个重要的键值对. `distributed`, `sync_nodes_mandatory` 和 `sync_nodes_timeout`, 其中:
+
+1. `distributed` 定义了分布式应用的启动延迟, 备用节点.
+2. `sync_nodes_mandatory` 定义强制要求的节点
+3. `sync_nodes_timeout` 定义了`distributed`中所有节点都启动完成需要等待的时间, 如果在此时间内要求的节点没有全部启动, 那么所有节点上的应用启动失败.
 
 abc.config
 
@@ -76,11 +80,11 @@ abc.config
 [
   {logger,[{console,[{format,<<"$date $time $metadata[$level] $message\n">>}]}]},
   {kernel,
-    [{distributed, [{'distro', 5000, ['abc@192.168.8.104', {'bcd@192.168.8.104', 'def@192.168.8.104'}]}]},
-     {sync_nodes_mandatory, ['bcd@192.168.8.104', 'def@192.168.8.104']},
-     {sync_nodes_timeout, 30000}
+    [{distributed, [
+        {'distro', 5000, ['abc@192.168.8.104', {'bcd@192.168.8.104', 'def@192.168.8.104'}]}]},
+        {sync_nodes_mandatory, ['bcd@192.168.8.104', 'def@192.168.8.104']},
+        {sync_nodes_timeout, 30000}
 ]}].
-
 ```
 
 bcd.config
@@ -89,9 +93,10 @@ bcd.config
 [
   {logger,[{console,[{format,<<"$date $time $metadata[$level] $message\n">>}]}]},
   {kernel,
-    [{distributed, [{distro,5000, ['abc@192.168.8.104', {'bcd@192.168.8.104', 'def@192.168.8.104'}]}]},
-     {sync_nodes_mandatory, ['abc@192.168.8.104', 'def@192.168.8.104']},
-     {sync_nodes_timeout, 30000}
+    [{distributed, [
+        {distro,5000, ['abc@192.168.8.104', {'bcd@192.168.8.104', 'def@192.168.8.104'}]}]},
+        {sync_nodes_mandatory, ['abc@192.168.8.104', 'def@192.168.8.104']},
+        {sync_nodes_timeout, 30000}
 ]}].
 ```
 
@@ -101,9 +106,10 @@ def.config
 [
   {logger,[{console,[{format,<<"$date $time $metadata[$level] $message\n">>}]}]},
   {kernel,
-    [{distributed, [{distro,5000, ['abc@192.168.8.104', {'bcd@192.168.8.104', 'def@192.168.8.104'}]}]},
-     {sync_nodes_mandatory, ['abc@192.168.8.104', 'bcd@192.168.8.104']},
-     {sync_nodes_timeout, 30000}
+    [{distributed, [
+        {distro,5000, ['abc@192.168.8.104', {'bcd@192.168.8.104', 'def@192.168.8.104'}]}]},
+        {sync_nodes_mandatory, ['abc@192.168.8.104', 'bcd@192.168.8.104']},
+        {sync_nodes_timeout, 30000}
 ]}].
 
 ```
@@ -111,19 +117,26 @@ def.config
 在不同的终端自动全部3个节点
 
 ```
-iex --name abc@192.168.8.104 -pa _build/dev/lib/distro/ebin/ --app distro --erl "-config config/abc"
-iex --name bcd@192.168.8.104 -pa _build/dev/lib/distro/ebin/ --app distro --erl "-config config/bcd"
-iex --name def@192.168.8.104 -pa _build/dev/lib/distro/ebin/ --app distro --erl "-config config/def"
+iex --name abc@192.168.8.104 -pa _build/dev/lib/distro/ebin/ --app distro \
+--erl "-config config/abc"
+
+iex --name bcd@192.168.8.104 -pa _build/dev/lib/distro/ebin/ --app distro \
+--erl "-config config/bcd"
+
+iex --name def@192.168.8.104 -pa _build/dev/lib/distro/ebin/ --app distro \
+--erl "-config config/def"
 ```
 
 
 ## 验证步骤
 
-1. 终止(Ctrl+C两次)节点`abc@192.168.8.104`后,5秒内会在节点`bcd@192.168.8.104`上重启应用
-2. 再次启动节点`abc@192.168.8.104`后,应用在`bcd@192.168.8.104`上停止, 应用被恢复后的`abc@192.168.8.104`节点接管(Takeover)
+bcd, def 是 abc 的备用节点. bcd 优先于def, 如果abc死掉, 应用程序会在bcd上重启, 如果bcd死掉, 应用程序会转移到def, 这时候abc, bcd 修复启动后, 应用会被abc接管.
 
+1. 终止(Ctrl+C两次)节点abc@192.168.8.104后,5秒内会在节点bcd@192.168.8.104上重启应用
+2. 再次启动节点abc@192.168.8.104后,应用在bcd@192.168.8.104上停止, 应用被恢复后的abc@192.168.8.104节点接管(Takeover)
 
 ## 参考资料
 
-1. Elixir Application Failover/Takeover
-https://erlangcentral.org/topic/elixir-application-failovertakeover/
+1. [Elixir Application Failover/Takeover](https://erlangcentral.org/topic/elixir-application-failovertakeover)
+2. [Distributed OTP Applications](http://learnyousomeerlang.com/distributed-otp-applications)
+3. [源码仓库](https://github.com/developerworks/distro) (**求加星**)
