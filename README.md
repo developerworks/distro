@@ -139,4 +139,4 @@ bcd, def 是 abc 的备用节点. bcd 优先于def, 如果abc死掉, 应用程�
 
 1. [Elixir Application Failover/Takeover](https://erlangcentral.org/topic/elixir-application-failovertakeover)
 2. [Distributed OTP Applications](http://learnyousomeerlang.com/distributed-otp-applications)
-3. [源码仓库](https://github.com/developerworks/distro) (**求加星**)
+3. [源码仓库](https://github.com/developerworks/distro) 
